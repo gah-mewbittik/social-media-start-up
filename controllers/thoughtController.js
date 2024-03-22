@@ -66,11 +66,42 @@ async deleteThought(req, res){
             });
         }
         //delete user thoughts
-        await Thought.deleteMany({_id: {$in: user.thoughts}}) //TODO: review if this done properly
+        await Reaction.deleteMany({_id: {$in: thought.reactions}}) 
     }catch(err){
         console.log(err);
         res.status(500).json(err);
     }
-}
+},
+//Create a reaction TODO: review this   
+async createReaction(req, res){
+    try{
+        const thought = await Thought.create(req.body);
+        res.json(thought);
+    }catch(err){
+        console.log(err);
+        res.status(500).json(err);
+    }
+},
+// Deleting a reaction
+async deleteReaction(req, res){
+    try{
+        const thought = await findOneAndDelete({
+            _id: req.params.userId
+        });
+
+        if(!thought){
+            return res.status(404).json({
+                message: 'No user with that ID'
+            });
+        }
+        //delete user thoughts TODO: Do i need below??
+        // await Thought.deleteMany({_id: {$in: user.thoughts}}) 
+        // res.json({ message: 'User and associated apps deleted!' })
+    }catch(err){
+        console.log(err);
+        res.status(500).json(err);
+    }
+},
+
 
 };
