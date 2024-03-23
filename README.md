@@ -17,7 +17,7 @@ N/A
 
 ## Usage
 
-To view the application in action, simply click the following link: **ADD LINK**
+To view the application in action, simply click the following link: https://drive.google.com/file/d/162ThFBeafmBWBLqfTL8oxnZKCQMawSLd/view?usp=sharing
 The link will redirect you to the demonstration walkthrough video of the application. The Social Media Start Up application implements the CRUD operation. 
 
 ## Credits
