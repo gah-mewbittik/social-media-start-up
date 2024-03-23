@@ -18,6 +18,7 @@ async getUsers(req, res){
                 _id: req.params.userId
             })
             .select('-__v');
+            res.json(user);
         }catch(err){
             console.log(err);
             res.status(500).json(err);
@@ -39,7 +40,8 @@ async updateUser(req, res){
         const user = await User.findOneAndUpdate(
             {_id: req.params.userId},
             {$set: req.body},
-            //TODO: do I need more??
+            {new: true}
+            
         );
 
         if(!user){
@@ -56,7 +58,7 @@ async updateUser(req, res){
 // Deleting a user
 async deleteUser(req, res){
     try{
-        const user = await findOneAndDelete({
+        const user = await User.findOneAndDelete({
             _id: req.params.userId
         });
 
@@ -65,6 +67,7 @@ async deleteUser(req, res){
                 message: 'No user with that ID'
             });
         }
+        res.json({ message: 'User and associated thoughts deleted!' });
         //delete user thoughts
         await Thought.deleteMany({_id: {$in: user.thoughts}}) 
     }catch(err){
@@ -72,11 +75,11 @@ async deleteUser(req, res){
         res.status(500).json(err);
     }
 },
-//Create a friend TODO: review this   
+//Create a friend   
 async createFriend(req, res){
     try{
-        const user = await User.create(req.body);
-        res.json(user);
+        const friend = await User.create(req.body);
+        res.json(friend);
     }catch(err){
         console.log(err);
         res.status(500).json(err);
@@ -85,7 +88,7 @@ async createFriend(req, res){
 // Deleting a friend
 async deleteFriend(req, res){
     try{
-        const user = await findOneAndDelete({
+        const user = await User.findOneAndDelete({
             _id: req.params.userId
         });
 

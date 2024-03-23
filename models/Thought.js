@@ -1,11 +1,11 @@
-const { Schema, model } = require('mongoose');
-const { monitorEventLoopDelay } = require('perf_hooks');
+const { Schema, model, Types } = require('mongoose');
+
 
 //Define reactionSchema as a sub-document
 const reactionSchema = new Schema({
     reactionId: {
-        type: Schema.Types.ObjectId,
-        default: mongoose.Types.ObjectId,
+        type: Types.ObjectId,
+        default: Types.ObjectId,
     },
     reactionBody: {
         type: String,

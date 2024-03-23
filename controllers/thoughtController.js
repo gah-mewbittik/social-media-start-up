@@ -18,6 +18,7 @@ async getThoughts(req, res){
                 _id: req.params.thoughtId
             })
             .select('-__v');
+            res.json(thought);
         }catch(err){
             console.log(err);
             res.status(500).json(err);
@@ -27,6 +28,13 @@ async getThoughts(req, res){
 async createThought(req, res){
     try{
         const thought = await Thought.create(req.body);
+
+        //update user with new thought
+        const user = await User.findOneAndUpdate(
+            {username: req.body.username},
+            {$push: {thoughts: thought._id}, $inc: {thoughtCount: 1 }},
+            {new: true}
+        );
         res.json(thought);
     }catch(err){
         console.log(err);
@@ -39,7 +47,8 @@ async updateThought(req, res){
         const thought = await Thought.findOneAndUpdate(
             {_id: req.params.thoughtId},
             {$set: req.body},
-            //TODO: do I need more??
+            {new: true}
+            
         );
 
         if(!thought){
@@ -47,7 +56,7 @@ async updateThought(req, res){
                 message: 'No user with that ID'
             });
         }
-        res.json(user);
+        res.json(thought);
     }catch(err){
         console.log(err);
         res.status(500).json(err);
@@ -65,8 +74,9 @@ async deleteThought(req, res){
                 message: 'No user with that ID'
             });
         }
+        res.json({ message: 'Thought and associated reactions deleted!' });
         //delete user thoughts
-        await Reaction.deleteMany({_id: {$in: thought.reactions}}) 
+        await Thought.deleteMany({_id: {$in: thought.reactions}}) ///this line need to be changed cause of an error to "Reaction"
     }catch(err){
         console.log(err);
         res.status(500).json(err);
