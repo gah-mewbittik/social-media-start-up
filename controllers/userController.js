@@ -111,18 +111,38 @@ async createFriend(req, res){
 // Deleting a friend
 async deleteFriend(req, res){
     try{
-        const user = await User.findOneAndDelete({
-            _id: req.params.userId
-        });
+         //find current User
+         const currentUser = await User.findById(req.params.userId);
+         if(!currentUser){
+             return res.status(404).json({ message: 'User not found'});
+         }
+ 
+         //find friend user
+         const friendUser = await User.findById(req.params.friendsId);
+         if(!friendUser){
+             return res.status(404).json({message: ' Friend not found'});
+         }
 
-        if(!user){
-            return res.status(404).json({
-                message: 'No user with that ID'
-            });
-        }
-        //delete user thoughts TODO: Do i need below??
-        // await Thought.deleteMany({_id: {$in: user.thoughts}}) 
-        // res.json({ message: 'User and associated apps deleted!' })
+         // check if friend is in user's friend list
+         const friendIndex = currentUser.friends.indexOf(friendUser._id);
+         if(friendIndex === -1){
+            return res.status(400).json({ message: 'Friend not found in list'})
+         }
+         //Remove friend from user's list
+         currentUser.friends.splice(friendIndex, 1);
+         await currentUser.save();
+
+         //check if user exist in friends' list
+         const userIndex = friendUser.friends.indexOf(currentUser._id);
+         if(userIndex === -1){
+            return res.status(400).json({ message: 'User not found in list'})
+         }
+         //Remove user form friend's list
+         friendUser.friends.splice(userIndex, 1);
+         await friendUser.save();
+
+         res.json({ message:'Friend deleted successfully'});
+
     }catch(err){
         console.log(err);
         res.status(500).json(err);
