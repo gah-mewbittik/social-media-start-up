@@ -85,8 +85,23 @@ async deleteThought(req, res){
 //Create a reaction TODO: review this   
 async createReaction(req, res){
     try{
-        const thought = await Thought.create(req.body);
-        res.json(thought);
+        // create reaction
+        const newReaction = {
+            reactionBody: req.body.reactionBody,
+            username: req.body.username,
+        };
+
+        //find current thought
+        const currentThought = await Thought.findById(req.params.thoughtId);
+        if(!currentThought){
+            return res.status(404).json({message: 'Thought not found'});
+        }
+        
+        //update thought reaction list
+        currentThought.reactions.push(newReaction);
+        await currentThought.save();
+
+        res.json({message: 'Reaction added successfully', reaction: newReaction});
     }catch(err){
         console.log(err);
         res.status(500).json(err);
@@ -95,18 +110,30 @@ async createReaction(req, res){
 // Deleting a reaction
 async deleteReaction(req, res){
     try{
-        const thought = await findOneAndDelete({
-            _id: req.params.userId
-        });
+        const { thoughtId, reactionId} = req.params;
+
+        //find Thought that contains reaction
+        const thought = await Thought.findById(thoughtId);
 
         if(!thought){
             return res.status(404).json({
-                message: 'No user with that ID'
+                message: 'No thought with that ID'
             });
         }
-        //delete user thoughts TODO: Do i need below??
-        // await Thought.deleteMany({_id: {$in: user.thoughts}}) 
-        // res.json({ message: 'User and associated apps deleted!' })
+        // get the index of reaction in its array
+        const reactionIndex = thought.reactions.findIndex(reaction => reaction._id.toString() === reactionId);
+
+        if(reactionIndex === -1){
+            return res.status(404).json({ message: 'No reaction with that ID'});
+        }
+
+        //remove reaction
+        thought.reactions.splice(reactionIndex, 1);
+
+        //Save
+        await thought.save();
+
+        res.json({message: 'Reaction deleted successfully'});
     }catch(err){
         console.log(err);
         res.status(500).json(err);
