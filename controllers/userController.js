@@ -78,8 +78,31 @@ async deleteUser(req, res){
 //Create a friend   
 async createFriend(req, res){
     try{
-        const friend = await User.create(req.body);
-        res.json(friend);
+        //find current User
+        const currentUser = await User.findById(req.params.userId);
+        if(!currentUser){
+            return res.status(404).json({ message: 'User not found'});
+        }
+
+        //find friend user
+        const friendUser = await User.findById(req.params.friendsId);
+        if(!friendUser){
+            return res.status(404).json({message: ' Friend not found'});
+        }
+
+        //check if friend already in user's friend list
+        if(currentUser.friends.includes(friendUser._id)){
+            return res.status(400).json({message: 'User is already friends with this user'});
+        }
+        // update user's friend list
+        currentUser.friends.push(friendUser._id);
+        await currentUser.save();
+        
+        //update friend's friend list
+        friendUser.friends.push(currentUser._id);
+        await friendUser.save();
+
+        res.json({message: 'Friend added successfully'});
     }catch(err){
         console.log(err);
         res.status(500).json(err);
